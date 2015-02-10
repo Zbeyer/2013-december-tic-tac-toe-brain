@@ -1,0 +1,162 @@
+<html>
+
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <script type="text/javascript" src="functions.js"></script>
+
+
+</head>
+
+<body>
+    <script type="text/javascript">
+        var myBoard;
+        var curPiece;
+        var myButtons;
+        var calcRuns;
+
+        var debug = 0;
+
+        //Zbeyer -> This is a quick hack.
+        var theWinningPlayer = 0; //Only used to update UI
+
+        window.onload = function ()
+         //Initialize board when the window loads
+        {
+            start();
+        };
+
+        function start()
+        {
+            myBoard = newBoard(); //new board
+            curPiece = 1; //Set player 1 first player
+            myButtons = generateButtons(myBoard); //generate UI
+
+            //This will reset the UI that is displayed during 'game over'
+            gameOverUI();
+            printDifficulty();
+            printHeight();
+            printWidth();
+            printWinLength();
+        }
+
+        function generateButtons(board)
+        {
+
+            //UI for board ticTacMain
+            var div = document.getElementById('ticTacMain');
+            //Reset div
+            div.innerHTML = "";
+
+
+            var boardString = "<br>";
+            var bttns;
+
+            //Bail if board is 0
+            if (board.length < 1)
+                return;
+
+            //Style button height & width by button count
+            var width = (1 / BOARD_WIDTH) * 100;
+            var height = (1 / BOARD_HEIGHT) * 90;
+
+            console.log(width);
+
+            var bgImg = document.URL + 'tile.png';
+
+            //generate HTML
+            for (var y = 0; y < board[0].length; y++)
+            {
+                for (var x = 0; x < board.length; x++)
+                {
+                    var button = document.createElement("button");
+
+                    button.id = encodeMaskedMove(x, y).toString();
+                    button.className = "ticTacButton";
+                    button.innerHTML = "_";
+                    button.setAttribute("onClick", "onButton(" + x + "," + y + ", this);");
+                    button.style.width = width.toString() + "%";
+                    button.style.height = height.toString() + "%";
+                    button.style.backgroundImage = "url("+ bgImg +")";
+//                    button.style.backgroundColor = 123456;
+//                    if (width < 75)
+//                        button.style.fontSize = 24;
+//                    else
+                        button.style.fontSize = (width+height) * 0.6;
+
+
+
+                    div.appendChild(button);
+                }
+                div.innerHTML = div.innerHTML + "<br>";
+            }
+        }
+    </script>
+
+    <div class="ticTacMain" id="ticTacMain">
+        <!-- OLD CODE : still user this div -->
+        <!--
+        <button id="a" class="ticTacButton" onclick="onButton(0, 0, this);">_</button>
+        <button id="b" class="ticTacButton" onclick="onButton(1, 0, this);">_</button>
+        <button id="c" class="ticTacButton" onclick="onButton(2, 0, this);">_</button>
+        <br>
+        <button id="d" class="ticTacButton" onclick="onButton(0, 1, this);">_</button>
+        <button id="e" class="ticTacButton" onclick="onButton(1, 1, this);">_</button>
+        <button id="f" class="ticTacButton" onclick="onButton(2, 1, this);">_</button>
+        <br>
+        <button id="g" class="ticTacButton" onclick="onButton(0, 2, this);">_</button>
+        <button id="h" class="ticTacButton" onclick="onButton(1, 2, this);">_</button>
+        <button id="i" class="ticTacButton" onclick="onButton(2, 2, this);">_</button>
+        -->
+        <br>
+
+    </div>
+
+    <button id="a" class="ticTacResetButton" onclick="start();">Reset</button>
+
+    <div id="difficultyPrint"><a>difficulty: 0</a></div>
+    <button id="a" class="ticTacSettingButton" onclick="incDiff();">&uarr;</button>
+    <button id="a" class="ticTacSettingButton" onclick="decDiff();">&darr;</button>
+
+    <br>
+    <div id="heightPrint"><a>height: 3</a></div>
+    <button id="a" class="ticTacSettingButton" onclick="incH();">&uarr;</button>
+    <button id="a" class="ticTacSettingButton" onclick="decH();">&darr;</button>
+
+    <div id="widthPrint"><a>width: 3</a></div>
+    <button id="a" class="ticTacSettingButton" onclick="incW();">&uarr;</button>
+    <button id="a" class="ticTacSettingButton" onclick="decW();">&darr;</button>
+
+    <div id="winPrint"><a>winLength: 3</a></div>
+    <button id="a" class="ticTacSettingButton" onclick="incWin();">&uarr;</button>
+    <button id="a" class="ticTacSettingButton" onclick="decWin();">&darr;</button>
+
+
+    <p>Zachary D. Beyer - Code Sample - Tic Tac Toe Brain</p>
+    <p>Brute Force, Recursion, & Javascript</p>
+    <br>
+    <p>Higher difficulty means more look ahead (will take longer for computer to respond).</p>
+    <p>Larger game board sizes also will increase number of calculations needed to predict moves.</p>
+    <br>
+    <p>TODO: Optimize lookahead to make faster.</p>
+    <p>TODO: Fix bug: on n by m grid, where (n != m), player 1 will not always receive credit for winning.</p>
+    <p>TODO: Cache lookahead computations to prevent redundant calculations (memoization).</p>
+
+    <!--    <p>View source:</p>
+    <a href="view-source:zbeyer.com/codeSamples/ticTacToe/" target="_blank">index.html</a>    <br>
+    <a href="view-source:zbeyer.com/codeSamples/ticTacToe/functions.js" target="_blank">functions.js</a>  <br>
+    <a href="view-source:zbeyer.com/codeSamples/ticTacToe/style.css" target="_blank">style.css</a>    <br>-->
+
+
+    <div class="ticTacOutputBoardPrint" id="ticTacOutputBoardPrint">
+
+    </div>
+
+
+    <div class="ticTacOutput" id="ticTacOutput">
+    </div>>
+
+</body>
+
+</html>
